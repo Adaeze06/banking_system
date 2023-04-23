@@ -100,7 +100,7 @@ def log_in():
         password = password_entry.get()
 
         # Check if user exists in MySQL table
-        cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
+        cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
         result = cursor.fetchone()
 
         if result:
@@ -110,6 +110,7 @@ def log_in():
 
     submit_button = tk.Button(top, text="Submit", command=submit)
     submit_button.pack(pady=10)
+    
 
 #login button
 login_text=tk.StringVar()
@@ -123,8 +124,27 @@ register_btn=tk.Button(root, textvariable= register_text, command=lambda:create_
 register_text.set('Create Account')
 register_btn.grid(column=1, row=3)
 
-canvas = tk.Canvas(root, height=200, width=100)
-canvas.grid(columnspan=3)
+# Create check balance button
+balance_text=tk.StringVar()
+balance_btn=tk.Button(root, textvariable= balance_text, command=lambda:check_balance(), bg= '#fc9484', fg='white', height=2, width=15)
+balance_text.set('Check Balance')
+balance_btn.grid(column=1, row=4)
+
+# Add check balance button to frame
+def check_balance():
+    # Retrieve balance from MySQL table
+    username = "Samantha"  # Replace with logged-in user's username
+    cursor.execute("SELECT balance FROM elite_users WHERE username = %s", (username,))
+    result = cursor.fetchone()
+
+    if result:
+        balance = result[0]
+        messagebox.showinfo("Balance", f"Your current balance is: ${balance}")
+    else:
+        messagebox.showerror("Error", "Could not retrieve balance.")
+
+
+
 
 
 root.mainloop()
