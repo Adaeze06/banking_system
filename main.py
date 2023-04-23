@@ -93,6 +93,24 @@ def log_in():
     password_entry.pack(side="left")
     password_frame.pack(pady=10)
 
+    # Submit Button
+    def submit():
+        # Retrieve username and password from entries
+        username = username_entry.get()
+        password = password_entry.get()
+
+        # Check if user exists in MySQL table
+        cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
+        result = cursor.fetchone()
+
+        if result:
+            messagebox.showinfo("Success", "Login successful!")
+        else:
+            messagebox.showerror("Error", "Invalid username or password.")
+
+    submit_button = tk.Button(top, text="Submit", command=submit)
+    submit_button.pack(pady=10)
+
 #login button
 login_text=tk.StringVar()
 login_btn=tk.Button(root, textvariable= login_text, command=lambda:log_in(), bg= '#fc9484', fg='white', height=2, width=15)
