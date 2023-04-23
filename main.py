@@ -1,8 +1,18 @@
 import tkinter as tk
 from PIL import Image,ImageTk
 import os 
+import mysql.connector
+from tkinter import messagebox
+
+db = mysql.connector.connect(
+    user="root",
+    password="Frederick$01",
+    database="elite_savings"
+)
+cursor = db.cursor()
 
 root = tk.Tk()
+
 
 #window setup
 canvas = tk.Canvas(root, height=300, width=600)
@@ -16,17 +26,76 @@ logo_label.image = logo
 logo_label.grid(column=1, row=0)
 
 #instructions
-instructions = tk.Label(root, text = "Welcome to Elite Savings!  Enter your Account Number to log in.")
+instructions = tk.Label(root, text = "Welcome to Elite Savings! Click a button to begin.")
 instructions.grid(columnspan=3, column=0, row=1)
 
 
 #function for Registering New User
 def create_account():
-    print('is this working')
+    top = tk.Toplevel(root)
+    top.title("Create New Account")
+    top.geometry("500x500")
+    label = tk.Label(top, image=logo)
+    label2 = tk.Label(top, text="To create a new account enter details below!")
+    label.pack(pady=20)
+    label2.pack(pady=20)
+
+    # Entries
+    username_frame = tk.Frame(top)
+    username_label = tk.Label(username_frame, text="Username:")
+    username_label.pack(side="left")
+    username_entry = tk.Entry(username_frame)
+    username_entry.pack(side="left")
+    username_frame.pack(pady=10)
+
+    password_frame = tk.Frame(top)
+    password_label = tk.Label(password_frame, text="Password:")
+    password_label.pack(side="left")
+    password_entry = tk.Entry(password_frame, show="*")
+    password_entry.pack(side="left")
+    password_frame.pack(pady=10)
+
+    # Submit Button
+    def submit():
+        # Insert data into MySQL table
+        username = username_entry.get()
+        password = password_entry.get()
+        cursor.execute("INSERT INTO elite_users (username, password) VALUES (%s, %s)", (username, password))
+        db.commit()
+        messagebox.showinfo("Success", "New user account created!")
+        top.destroy()
+
+    submit_button = tk.Button(top, text="Submit", command=submit)
+    submit_button.pack(pady=10)
+
+def log_in():
+    top = tk.Toplevel(root)
+    top.title('Log In')
+    top.geometry('500x500')
+    label3 = tk.Label(top, image=logo)
+    label4 = tk.Label(top, text="To login enter details below!")
+    label3.pack(pady=20)
+    label4.pack(pady=20)
+
+    # Username Entry
+    username_frame = tk.Frame(top)
+    username_label = tk.Label(username_frame, text="Username:")
+    username_label.pack(side="left")
+    username_entry = tk.Entry(username_frame)
+    username_entry.pack(side="left")
+    username_frame.pack(pady=10)
+
+    # Password Entry
+    password_frame = tk.Frame(top)
+    password_label = tk.Label(password_frame, text="Password:")
+    password_label.pack(side="left")
+    password_entry = tk.Entry(password_frame, show="*")
+    password_entry.pack(side="left")
+    password_frame.pack(pady=10)
 
 #login button
 login_text=tk.StringVar()
-login_btn=tk.Button(root, textvariable= login_text, bg= '#fc9484', fg='white', height=2, width=15)
+login_btn=tk.Button(root, textvariable= login_text, command=lambda:log_in(), bg= '#fc9484', fg='white', height=2, width=15)
 login_text.set('Login')
 login_btn.grid(column=1, row=2)
 
