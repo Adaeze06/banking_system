@@ -138,7 +138,11 @@ withdraw_btn=tk.Button(root, textvariable= withdraw_text, command=lambda:withdra
 withdraw_text.set('Withdraw Money')
 withdraw_btn.grid(column=1, row=5)
 
-
+# Create deposit button 
+deposit_text=tk.StringVar()
+deposit_btn=tk.Button(root, textvariable= deposit_text, command=lambda:deposit_money(), bg= '#fc9484', fg='white', height=2, width=15)
+deposit_text.set('Deposit Money')
+deposit_btn.grid(column=1, row=6)
 
 # Add check balance button
 def check_balance():
@@ -193,11 +197,44 @@ def withdraw_money():
     new_balance = balance - withdraw_amount
 
     # Update balance in MySQL table
-    cursor.execute("UPDATE accounts SET balance = %s WHERE username = %s", (new_balance, username))
+    cursor.execute("UPDATE elite_users SET balance = %s WHERE username = %s", (new_balance, username))
     db.commit()
 
     # Show confirmation message
     messagebox.showinfo("Withdraw Money", f"Withdrawal successful! Your new balance is: ${new_balance}")
 
-        
+
+# Add deposit button
+def deposit_money():
+    # Prompt for username and password
+    username = simpledialog.askstring("Withdraw Money", "Enter your username:")
+    password = simpledialog.askstring("Withdraw Money", "Enter your password:", show="*")
+
+    # Check if user exists and password is correct
+    cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
+    result = cursor.fetchone()
+    if not result:
+        messagebox.showerror("Error", "Invalid username or password.")
+        return
+
+    # Retrieve balance from MySQL table
+    balance = result[5] # balance is the fifth column in the table 
+
+    # Ask for deposit amount
+    deposit_amount = simpledialog.askinteger("Deposit Money", f"Your current balance is: ${balance}. How much would you like to deposit?")
+    if not deposit_amount:
+        # User cancelled the dialog box
+        return
+
+    # Add deposit_amount from balance
+    new_balance = balance + deposit_amount
+
+    # Update balance in MySQL table
+    cursor.execute("UPDATE elite_users SET balance = %s WHERE username = %s", (new_balance, username))
+    db.commit()
+
+    # Show confirmation message
+    messagebox.showinfo("Deposit Money", f"Deposit successful! Your new balance is: ${new_balance}")
+
+
 root.mainloop()
