@@ -236,5 +236,4 @@ def deposit_money():
     # Show confirmation message
     messagebox.showinfo("Deposit Money", f"Deposit successful! Your new balance is: ${new_balance}")
 
-
 root.mainloop()
