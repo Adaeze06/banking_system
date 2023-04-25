@@ -3,6 +3,7 @@ from PIL import Image,ImageTk
 import os 
 import mysql.connector
 from tkinter import messagebox
+from tkinter import simpledialog
 
 db = mysql.connector.connect(
     user="root",
@@ -10,6 +11,7 @@ db = mysql.connector.connect(
     database="elite_savings"
 )
 cursor = db.cursor()
+
 
 root = tk.Tk()
 
@@ -130,21 +132,72 @@ balance_btn=tk.Button(root, textvariable= balance_text, command=lambda:check_bal
 balance_text.set('Check Balance')
 balance_btn.grid(column=1, row=4)
 
-# Add check balance button to frame
-def check_balance():
-    # Retrieve balance from MySQL table
-    username = "Samantha"  # Replace with logged-in user's username
-    cursor.execute("SELECT balance FROM elite_users WHERE username = %s", (username,))
-    result = cursor.fetchone()
+# Create withdraw button
+withdraw_text=tk.StringVar()
+withdraw_btn=tk.Button(root, textvariable= withdraw_text, command=lambda:withdraw_money(), bg= '#fc9484', fg='white', height=2, width=15)
+withdraw_text.set('Withdraw Money')
+withdraw_btn.grid(column=1, row=5)
 
+
+
+# Add check balance button
+def check_balance():
+    # Prompt for username and password
+    username = simpledialog.askstring("Check Balance", "Enter your username:")
+    password = simpledialog.askstring("Check Balance", "Enter your password:", show="*")
+
+    # Check if user exists and password is correct
+    cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
+    result = cursor.fetchone()
+    if not result:
+        messagebox.showerror("Error", "Invalid username or password.")
+        return
+
+    # Retrieve balance from MySQL table    
     if result:
-        balance = result[0]
+        balance = result[5] # balance is the fifth column in the table 
         messagebox.showinfo("Balance", f"Your current balance is: ${balance}")
     else:
         messagebox.showerror("Error", "Could not retrieve balance.")
 
 
+# Add Withdraw Button
 
+def withdraw_money():
+    # Prompt for username and password
+    username = simpledialog.askstring("Withdraw Money", "Enter your username:")
+    password = simpledialog.askstring("Withdraw Money", "Enter your password:", show="*")
 
+    # Check if user exists and password is correct
+    cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
+    result = cursor.fetchone()
+    if not result:
+        messagebox.showerror("Error", "Invalid username or password.")
+        return
 
+    # Retrieve balance from MySQL table
+    balance = result[5] # balance is the fifth column in the table 
+
+    # Ask for withdraw amount
+    withdraw_amount = simpledialog.askinteger("Withdraw Money", f"Your current balance is: ${balance}. How much would you like to withdraw?")
+    if not withdraw_amount:
+        # User cancelled the dialog box
+        return
+
+    # Check if balance is sufficient
+    if balance < withdraw_amount:
+        messagebox.showerror("Error", "Insufficient balance.")
+        return
+
+    # Deduct withdraw_amount from balance
+    new_balance = balance - withdraw_amount
+
+    # Update balance in MySQL table
+    cursor.execute("UPDATE accounts SET balance = %s WHERE username = %s", (new_balance, username))
+    db.commit()
+
+    # Show confirmation message
+    messagebox.showinfo("Withdraw Money", f"Withdrawal successful! Your new balance is: ${new_balance}")
+
+        
 root.mainloop()
