@@ -68,9 +68,9 @@ def create_account():
     balance_entry.pack(side="left")
     balance_frame.pack(pady=10)
 
-    # Submit Button
+    #submit Button
     def submit():
-        # Insert data into MySQL table
+        #Insert data into MySQL table
         username = username_entry.get()
         password = password_entry.get()
         balance = balance_entry.get()
