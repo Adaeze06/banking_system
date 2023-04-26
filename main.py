@@ -1,9 +1,13 @@
+#import all necessary modules
+
 import tkinter as tk
 from PIL import Image,ImageTk
 import os 
 import mysql.connector
 from tkinter import messagebox
 from tkinter import simpledialog
+
+#connect to my sql database
 
 db = mysql.connector.connect(
     user="root",
@@ -16,7 +20,7 @@ cursor = db.cursor()
 root = tk.Tk()
 
 
-#window setup
+# main window setup
 canvas = tk.Canvas(root, height=300, width=600)
 canvas.grid(columnspan=3, rowspan=3)
 
@@ -32,7 +36,7 @@ instructions = tk.Label(root, text = "Welcome to Elite Savings! Click a button t
 instructions.grid(columnspan=3, column=0, row=1)
 
 
-#function for Registering New User
+#function for registering new user
 def create_account():
     top = tk.Toplevel(root)
     top.title("Create New Account")
@@ -78,6 +82,7 @@ def create_account():
     submit_button = tk.Button(top, text="Submit", command=submit)
     submit_button.pack(pady=10)
 
+#function for logging users in
 def log_in():
     top = tk.Toplevel(root)
     top.title('Log In')
@@ -87,7 +92,7 @@ def log_in():
     label3.pack(pady=20)
     label4.pack(pady=20)
 
-    # Username Entry
+    #entries
     username_frame = tk.Frame(top)
     username_label = tk.Label(username_frame, text="Username:")
     username_label.pack(side="left")
@@ -95,7 +100,7 @@ def log_in():
     username_entry.pack(side="left")
     username_frame.pack(pady=10)
 
-    # Password Entry
+    
     password_frame = tk.Frame(top)
     password_label = tk.Label(password_frame, text="Password:")
     password_label.pack(side="left")
@@ -103,13 +108,13 @@ def log_in():
     password_entry.pack(side="left")
     password_frame.pack(pady=10)
 
-    # Submit Button
+    #submit Button
     def submit():
-        # Retrieve username and password from entries
+        #retrieve username and password from entries
         username = username_entry.get()
         password = password_entry.get()
 
-        # Check if user exists in MySQL table
+        #check if user exists in MySQL table
         cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
         result = cursor.fetchone()
 
@@ -134,114 +139,113 @@ register_btn=tk.Button(root, textvariable= register_text, command=lambda:create_
 register_text.set('Create Account')
 register_btn.grid(column=1, row=3)
 
-# Create check balance button
+#check balance button
 balance_text=tk.StringVar()
 balance_btn=tk.Button(root, textvariable= balance_text, command=lambda:check_balance(), bg= '#fc9484', fg='white', height=2, width=15)
 balance_text.set('Check Balance')
 balance_btn.grid(column=1, row=4)
 
-# Create withdraw button
+#withdraw button
 withdraw_text=tk.StringVar()
 withdraw_btn=tk.Button(root, textvariable= withdraw_text, command=lambda:withdraw_money(), bg= '#fc9484', fg='white', height=2, width=15)
 withdraw_text.set('Withdraw Money')
 withdraw_btn.grid(column=1, row=5)
 
-# Create deposit button 
+#deposit button 
 deposit_text=tk.StringVar()
 deposit_btn=tk.Button(root, textvariable= deposit_text, command=lambda:deposit_money(), bg= '#fc9484', fg='white', height=2, width=15)
 deposit_text.set('Deposit Money')
 deposit_btn.grid(column=1, row=6)
 
-# Add check balance button
+#function for checking account balance
 def check_balance():
-    # Prompt for username and password
+  
+    #ask for username and password
     username = simpledialog.askstring("Check Balance", "Enter your username:")
     password = simpledialog.askstring("Check Balance", "Enter your password:", show="*")
 
-    # Check if user exists and password is correct
+    #check if user exists and password is correct
     cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
     result = cursor.fetchone()
     if not result:
         messagebox.showerror("Error", "Invalid username or password.")
         return
 
-    # Retrieve balance from MySQL table    
+    #retrieve balance from MySQL table    
     if result:
         balance = result[5] # balance is the fifth column in the table 
         messagebox.showinfo("Balance", f"Your current balance is: ${balance}")
     else:
         messagebox.showerror("Error", "Could not retrieve balance.")
-
-
-# Add Withdraw Button
-
+   
+#function for allowing users to withdraw money
 def withdraw_money():
-    # Prompt for username and password
+    #ask for username and password
     username = simpledialog.askstring("Withdraw Money", "Enter your username:")
     password = simpledialog.askstring("Withdraw Money", "Enter your password:", show="*")
 
-    # Check if user exists and password is correct
+    #check if user exists and password is correct
     cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
     result = cursor.fetchone()
     if not result:
         messagebox.showerror("Error", "Invalid username or password.")
         return
 
-    # Retrieve balance from MySQL table
+    #retrieve balance from MySQL table
     balance = result[5] # balance is the fifth column in the table 
 
-    # Ask for withdraw amount
+    #ask for withdraw amount
     withdraw_amount = simpledialog.askinteger("Withdraw Money", f"Your current balance is: ${balance}. How much would you like to withdraw?")
     if not withdraw_amount:
-        # User cancelled the dialog box
+        #user cancelled the dialog box
         return
 
-    # Check if balance is sufficient
+    # check if balance is sufficient
     if balance < withdraw_amount:
         messagebox.showerror("Error", "Insufficient balance.")
         return
 
-    # Deduct withdraw_amount from balance
+    #deduct withdraw_amount from balance
     new_balance = balance - withdraw_amount
 
-    # Update balance in MySQL table
+    #update balance in MySQL table
     cursor.execute("UPDATE elite_users SET balance = %s WHERE username = %s", (new_balance, username))
     db.commit()
 
-    # Show confirmation message
+    #show confirmation message
     messagebox.showinfo("Withdraw Money", f"Withdrawal successful! Your new balance is: ${new_balance}")
 
 
-# Add deposit button
+#function for allowing users to deposit money
 def deposit_money():
-    # Prompt for username and password
+    #ask for username and password
     username = simpledialog.askstring("Withdraw Money", "Enter your username:")
     password = simpledialog.askstring("Withdraw Money", "Enter your password:", show="*")
 
-    # Check if user exists and password is correct
+    #check if user exists and password is correct
     cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
     result = cursor.fetchone()
     if not result:
         messagebox.showerror("Error", "Invalid username or password.")
         return
 
-    # Retrieve balance from MySQL table
+    #retrieve balance from MySQL table
     balance = result[5] # balance is the fifth column in the table 
 
-    # Ask for deposit amount
+    #ask for deposit amount
     deposit_amount = simpledialog.askinteger("Deposit Money", f"Your current balance is: ${balance}. How much would you like to deposit?")
     if not deposit_amount:
-        # User cancelled the dialog box
+        #user cancelled the dialog box
         return
 
-    # Add deposit_amount from balance
+    #add deposit_amount from balance
     new_balance = balance + deposit_amount
 
-    # Update balance in MySQL table
+    #update balance in MySQL table
     cursor.execute("UPDATE elite_users SET balance = %s WHERE username = %s", (new_balance, username))
     db.commit()
 
-    # Show confirmation message
+    #show confirmation message
     messagebox.showinfo("Deposit Money", f"Deposit successful! Your new balance is: ${new_balance}")
 
 root.mainloop()
