@@ -57,12 +57,20 @@ def create_account():
     password_entry.pack(side="left")
     password_frame.pack(pady=10)
 
+    balance_frame = tk.Frame(top)
+    balance_label = tk.Label(balance_frame, text = "Starting Balance:")
+    balance_label.pack(side="left")
+    balance_entry = tk.Entry(balance_frame)
+    balance_entry.pack(side="left")
+    balance_frame.pack(pady=10)
+
     # Submit Button
     def submit():
         # Insert data into MySQL table
         username = username_entry.get()
         password = password_entry.get()
-        cursor.execute("INSERT INTO elite_users (username, password) VALUES (%s, %s)", (username, password))
+        balance = balance_entry.get()
+        cursor.execute("INSERT INTO elite_users (username, password, balance) VALUES (%s, %s, %s)", (username, password, balance))
         db.commit()
         messagebox.showinfo("Success", "New user account created!")
         top.destroy()
