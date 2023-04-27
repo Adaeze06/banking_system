@@ -219,8 +219,8 @@ def withdraw_money():
 #function for allowing users to deposit money
 def deposit_money():
     #ask for username and password
-    username = simpledialog.askstring("Withdraw Money", "Enter your username:")
-    password = simpledialog.askstring("Withdraw Money", "Enter your password:", show="*")
+    username = simpledialog.askstring("Deposit Money", "Enter your username:")
+    password = simpledialog.askstring("Deposit Money", "Enter your password:", show="*")
 
     #check if user exists and password is correct
     cursor.execute("SELECT * FROM elite_users WHERE username = %s AND password = %s", (username, password))
